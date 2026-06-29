@@ -9,6 +9,7 @@ import { taskPageMetadata } from '@/config/site.content'
 import { taskPageVoices } from '@/editable/content/task-pages.content'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { getTaskTheme, taskThemeStyle } from '@/editable/theme/task-themes'
+import { Ads } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -67,7 +68,6 @@ const taskGrid: Record<TaskKey, string> = {
 
 // Shared premium surface: hairline border, soft radius, smooth lift on hover.
 const cardBase = 'group block rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_32px_72px_rgba(15,23,42,0.14)]'
-
 export async function EditableTaskArchiveRoute({
   task,
   searchParams,
@@ -92,9 +92,11 @@ export function TaskArchiveView({ task, posts, pagination, category, basePath }:
   const page = pagination.page || 1
   const label = taskConfig?.label || task
   const categoryLabel = category === 'all' ? 'All categories' : CATEGORY_OPTIONS.find((item) => item.slug === category)?.name || category
+  const showSidebarAd = task === 'article'
+  const showInFeedAd = task === 'profile'
 
   return (
-    <EditableSiteShell>
+    <EditableSiteShell hideShellAds={task === 'article' || task === 'profile'}>
       <main style={taskThemeStyle(task)} className="min-h-screen bg-[var(--tk-bg)] text-[var(--tk-text)]">
         <header className="relative overflow-hidden border-b border-[var(--tk-line)]">
           <div className="pointer-events-none absolute inset-x-0 -top-40 h-96 bg-[radial-gradient(60%_60%_at_50%_0%,var(--tk-glow),transparent_70%)]" />
@@ -140,26 +142,49 @@ export function TaskArchiveView({ task, posts, pagination, category, basePath }:
         </header>
 
         <section className="mx-auto max-w-[var(--editable-container)] px-6 py-16 sm:py-20 lg:px-8">
-          {posts.length ? (
-            <div className={taskGrid[task]}>
-              {posts.map((post, index) => <ArchivePostCard key={post.id || post.slug} post={post} task={task} basePath={basePath} index={index} />)}
-            </div>
-          ) : (
-            <div className="mx-auto max-w-xl rounded-[var(--tk-radius)] border border-dashed border-[var(--tk-line)] bg-[var(--tk-surface)] px-8 py-16 text-center">
-              <Search className="mx-auto h-7 w-7 text-[var(--tk-muted)]" />
-              <h2 className="editable-display mt-5 text-2xl font-semibold tracking-[-0.02em]">Nothing here yet</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--tk-muted)]">Try another category, or check back after new {label.toLowerCase()} are published.</p>
-            </div>
-          )}
+          <div className={showSidebarAd ? 'grid gap-8 xl:grid-cols-[minmax(0,1fr)_336px]' : ''}>
+            <div>
+              {posts.length ? (
+                <div className={taskGrid[task]}>
+                  {posts.map((post, index) => (
+                    <div key={post.id || post.slug} className="contents">
+                      <ArchivePostCard post={post} task={task} basePath={basePath} index={index} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mx-auto max-w-xl rounded-[var(--tk-radius)] border border-dashed border-[var(--tk-line)] bg-[var(--tk-surface)] px-8 py-16 text-center">
+                  <Search className="mx-auto h-7 w-7 text-[var(--tk-muted)]" />
+                  <h2 className="editable-display mt-5 text-2xl font-semibold tracking-[-0.02em]">Nothing here yet</h2>
+                  <p className="mt-2 text-sm leading-6 text-[var(--tk-muted)]">Try another category, or check back after new {label.toLowerCase()} are published.</p>
+                </div>
+              )}
 
-          {posts.length ? (
-            <nav className="mt-16 flex items-center justify-center gap-3 text-sm">
-              {pagination.hasPrevPage ? <Link href={pageHref(basePath, category, page - 1)} className="rounded-full border border-[var(--tk-line)] px-5 py-2.5 font-medium transition hover:border-[var(--tk-accent)]">Previous</Link> : null}
-              <span className="rounded-full border border-[var(--tk-line)] bg-[var(--tk-surface)] px-5 py-2.5 font-medium text-[var(--tk-muted)]">Page {page} of {pagination.totalPages || 1}</span>
-              {pagination.hasNextPage ? <Link href={pageHref(basePath, category, page + 1)} className="rounded-full border border-[var(--tk-line)] px-5 py-2.5 font-medium transition hover:border-[var(--tk-accent)]">Next</Link> : null}
-            </nav>
-          ) : null}
+              {showInFeedAd ? (
+                <div className="mt-10">
+                  <Ads slot="in-feed" size="billboard" showLabel className="mx-auto w-full" />
+                </div>
+              ) : null}
+
+              {posts.length ? (
+                <nav className="mt-16 flex items-center justify-center gap-3 text-sm">
+                  {pagination.hasPrevPage ? <Link href={pageHref(basePath, category, page - 1)} className="rounded-full border border-[var(--tk-line)] px-5 py-2.5 font-medium transition hover:border-[var(--tk-accent)]">Previous</Link> : null}
+                  <span className="rounded-full border border-[var(--tk-line)] bg-[var(--tk-surface)] px-5 py-2.5 font-medium text-[var(--tk-muted)]">Page {page} of {pagination.totalPages || 1}</span>
+                  {pagination.hasNextPage ? <Link href={pageHref(basePath, category, page + 1)} className="rounded-full border border-[var(--tk-line)] px-5 py-2.5 font-medium transition hover:border-[var(--tk-accent)]">Next</Link> : null}
+                </nav>
+              ) : null}
+            </div>
+
+            {showSidebarAd ? (
+              <aside className="hidden xl:block">
+                <div className="sticky top-28">
+                  <Ads slot="sidebar" size="mpu" showLabel className="mx-auto w-full" />
+                </div>
+              </aside>
+            ) : null}
+          </div>
         </section>
+
       </main>
     </EditableSiteShell>
   )
@@ -185,7 +210,7 @@ function CardArrow({ label }: { label: string }) {
   )
 }
 
-// Yelp-style red star ratings. Prefers real rating/review fields, falls back to
+// Editorial rating row. Prefers real rating/review fields, falls back to
 // a stable derived value so the UI always reads well (wire to real data later).
 const hashStr = (value: string) => {
   let h = 0

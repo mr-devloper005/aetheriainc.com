@@ -2,13 +2,12 @@ import type { CSSProperties } from 'react'
 import type { TaskKey } from '@/lib/site-config'
 
 /*
-  Yelp-style task surfaces.
+  Editorial task surfaces.
 
-  Every task (archive + detail) now shares one cohesive premium identity:
-  clean white surfaces, the signature Yelp red accent, hairline gray borders
-  and a single crisp sans-serif — exactly like Yelp. Per-task copy (kicker /
-  note) still varies so each section keeps a little voice, but the visual
-  language is unified. Tokens are delivered via CSS variables (`--tk-*`).
+  Every task archive and detail page shares one cohesive identity:
+  soft paper backgrounds, deep blue accents, hairline borders and a crisp
+  sans-serif system. Per-task copy still varies so each section keeps its own
+  voice, while the visual language remains unified through `--tk-*` tokens.
 */
 
 export type TaskTheme = {
@@ -32,29 +31,28 @@ export type TaskTheme = {
   radius: string
 }
 
-const YELP_FONT = "'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+const EDITORIAL_FONT = "'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
 
-// Shared Yelp palette — every task inherits this; only kicker/note differ.
 const base = {
   dark: false,
-  fontDisplay: YELP_FONT,
-  fontBody: YELP_FONT,
-  bg: '#ffffff',
+  fontDisplay: EDITORIAL_FONT,
+  fontBody: EDITORIAL_FONT,
+  bg: '#fbfbf7',
   surface: '#ffffff',
-  raised: '#f7f7f7',
-  text: '#1a1a1a',
-  muted: '#6b6b6b',
-  line: '#e6e6e6',
-  accent: '#d32323',
-  accentSoft: '#fdecec',
+  raised: '#eef4f3',
+  text: '#071635',
+  muted: '#5c6575',
+  line: '#d9dfdf',
+  accent: '#2146d0',
+  accentSoft: '#e4ebff',
   onAccent: '#ffffff',
-  glow: 'rgba(211,35,35,0.06)',
-  radius: '0.75rem',
+  glow: 'rgba(33,70,208,0.10)',
+  radius: '1.5rem',
 } satisfies Omit<TaskTheme, 'kicker' | 'note'>
 
 export const taskThemes: Record<TaskKey, TaskTheme> = {
   article: { ...base, kicker: 'Articles', note: 'In-depth reads, guides and stories worth your time.' },
-  listing: { ...base, kicker: 'Businesses', note: 'Find, compare and connect with local businesses.' },
+  listing: { ...base, kicker: 'Businesses', note: 'Find, compare and connect with useful organizations.' },
   classified: { ...base, kicker: 'Marketplace', note: 'Fresh offers and listings, ready to act on.' },
   image: { ...base, kicker: 'Photos', note: 'A visual feed of standout images and galleries.' },
   sbm: { ...base, kicker: 'Bookmarks', note: 'Curated resources and links worth saving.' },
@@ -66,27 +64,26 @@ export function getTaskTheme(task: TaskKey): TaskTheme {
   return taskThemes[task] || taskThemes.article
 }
 
-/** All `--tk-*` tokens + font overrides for a task surface, ready for `style`. */
+/** All `--tk-*` tokens and font overrides for a task surface, ready for `style`. */
 export function taskThemeStyle(task: TaskKey): CSSProperties {
-  const t = getTaskTheme(task)
+  const theme = getTaskTheme(task)
+
   return {
-    '--tk-bg': t.bg,
-    '--tk-surface': t.surface,
-    '--tk-raised': t.raised,
-    '--tk-text': t.text,
-    '--tk-muted': t.muted,
-    '--tk-line': t.line,
-    '--tk-accent': t.accent,
-    '--tk-accent-soft': t.accentSoft,
-    '--tk-on-accent': t.onAccent,
-    '--tk-glow': t.glow,
-    '--tk-radius': t.radius,
-    // Re-point the shared article-body accent vars so post HTML (headings,
-    // links) inherits this task's accent instead of the global site accent.
-    '--slot4-accent': t.accent,
-    '--slot4-accent-fill': t.accent,
-    '--editable-font-display': t.fontDisplay,
-    '--editable-font-body': t.fontBody,
-    fontFamily: t.fontBody,
+    '--tk-bg': theme.bg,
+    '--tk-surface': theme.surface,
+    '--tk-raised': theme.raised,
+    '--tk-text': theme.text,
+    '--tk-muted': theme.muted,
+    '--tk-line': theme.line,
+    '--tk-accent': theme.accent,
+    '--tk-accent-soft': theme.accentSoft,
+    '--tk-on-accent': theme.onAccent,
+    '--tk-glow': theme.glow,
+    '--tk-radius': theme.radius,
+    '--slot4-accent': theme.accent,
+    '--slot4-accent-fill': theme.accent,
+    '--editable-font-display': theme.fontDisplay,
+    '--editable-font-body': theme.fontBody,
+    fontFamily: theme.fontBody,
   } as CSSProperties
 }
