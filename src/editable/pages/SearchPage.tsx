@@ -9,6 +9,7 @@ import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
 import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { pagesContent } from '@/editable/content/pages.content'
+import { Ads } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -118,6 +119,10 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
             </form>
           </div>
 
+          <div className="mx-auto max-w-6xl px-4 py-6">
+            <Ads slot="header" size="leaderboard" showLabel eager className="mx-auto w-full" />
+          </div>
+
           <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] opacity-50">{results.length} results</p>
@@ -126,16 +131,38 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
             <Link href="/article" className="inline-flex items-center gap-2 rounded-full border border-[var(--editable-border)] bg-white px-5 py-3 text-sm font-black">Browse latest <ArrowRight className="h-4 w-4" /></Link>
           </div>
 
-          {results.length ? (
-            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {results.map((post, index) => <SearchResultCard key={post.id || post.slug} post={post} index={index} />)}
+          <div className="mt-6 grid gap-8 xl:grid-cols-[minmax(0,1fr)_336px]">
+            <div>
+              {results.length ? (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {results.map((post, index) => (
+                    <div key={post.id || post.slug} className="contents">
+                      {index === 6 ? (
+                        <div key="search-in-feed-ad" className="md:col-span-2 xl:col-span-3">
+                          <Ads slot="in-feed" size="billboard" showLabel className="mx-auto w-full" />
+                        </div>
+                      ) : null}
+                      <SearchResultCard post={post} index={index} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[2rem] border border-dashed border-[var(--editable-border)] bg-white/70 p-10 text-center">
+                  <p className="text-2xl font-black tracking-[-0.04em]">No matching posts found.</p>
+                  <p className="mt-3 text-sm font-semibold opacity-60">Try a different keyword, task type, or category.</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="mt-8 rounded-[2rem] border border-dashed border-[var(--editable-border)] bg-white/70 p-10 text-center">
-              <p className="text-2xl font-black tracking-[-0.04em]">No matching posts found.</p>
-              <p className="mt-3 text-sm font-semibold opacity-60">Try a different keyword, task type, or category.</p>
-            </div>
-          )}
+            <aside className="hidden xl:block">
+              <div className="sticky top-28">
+                <Ads slot="sidebar" size="mpu" showLabel className="mx-auto w-full" />
+              </div>
+            </aside>
+          </div>
+
+          <div className="mx-auto max-w-6xl px-4 py-6">
+            <Ads slot="footer" size="leaderboard" showLabel className="mx-auto w-full" />
+          </div>
         </section>
       </main>
     </EditableSiteShell>

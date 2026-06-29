@@ -8,6 +8,7 @@ import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { EditableArticleComments } from '@/editable/components/EditableArticleComments'
 import { getTaskTheme, taskThemeStyle } from '@/editable/theme/task-themes'
+import { Ads } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -115,7 +116,7 @@ const mapSrcFor = (post: SitePost) => {
 
 export function TaskDetailView({ task, post, related, comments = [] }: { task: TaskKey; post: SitePost; related: SitePost[]; comments?: Array<{ id: string; name: string; comment: string; createdAt: string }> }) {
   return (
-    <EditableSiteShell>
+    <EditableSiteShell hideShellAds={task === 'article' || task === 'profile'}>
       <main style={taskThemeStyle(task)} className="min-h-screen bg-[var(--tk-bg)] text-[var(--tk-text)]">
         {task === 'listing' ? <ListingDetail post={post} related={related} /> : null}
         {task === 'classified' ? <ClassifiedDetail post={post} related={related} /> : null}
@@ -124,12 +125,17 @@ export function TaskDetailView({ task, post, related, comments = [] }: { task: T
         {task === 'pdf' ? <PdfDetail post={post} related={related} /> : null}
         {task === 'profile' ? <ProfileDetail post={post} related={related} /> : null}
         {task === 'article' ? <ArticleDetail post={post} related={related} comments={comments} /> : null}
+        {task === 'article' ? (
+          <div className="mx-auto max-w-6xl px-4 py-6">
+            <Ads slot="footer" size="leaderboard" showLabel className="mx-auto w-full" />
+          </div>
+        ) : null}
       </main>
     </EditableSiteShell>
   )
 }
 
-// Yelp-style red star rating row. Uses real rating/review fields when present,
+// Editorial rating row. Uses real rating/review fields when present,
 // otherwise a stable derived value (wire to real data when available).
 const hashStr = (value: string) => {
   let h = 0
@@ -194,17 +200,19 @@ function ArticleDetail({ post, related, comments }: { post: SitePost; related: S
   const images = getImages(post)
   return (
     <>
-      <article className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
-        <BackLink task="article" />
-        <p className="mt-10 text-xs font-medium uppercase tracking-[0.28em] text-[var(--tk-accent)]">{categoryOf(post, 'Article')}</p>
-        <h1 className="editable-display mt-5 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.4rem]">{post.title}</h1>
-        <div className="mt-6 text-sm text-[var(--tk-muted)]">
-          <span>{SITE_CONFIG.name}</span>
-        </div>
-        {images[0] ? <img src={images[0]} alt="" className="mt-10 aspect-[16/9] w-full rounded-[var(--tk-radius)] border border-[var(--tk-line)] object-cover" /> : null}
-        <BodyContent post={post} />
-        <EditableArticleComments slug={post.slug} comments={comments} />
-      </article>
+      <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
+        <article className="mx-auto w-full max-w-4xl">
+          <BackLink task="article" />
+          <p className="mt-10 text-xs font-medium uppercase tracking-[0.28em] text-[var(--tk-accent)]">{categoryOf(post, 'Article')}</p>
+          <h1 className="editable-display mt-5 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.4rem]">{post.title}</h1>
+          <div className="mt-6 text-sm text-[var(--tk-muted)]">
+            <span>{SITE_CONFIG.name}</span>
+          </div>
+          {images[0] ? <img src={images[0]} alt="" className="mt-10 aspect-[16/9] w-full rounded-[var(--tk-radius)] border border-[var(--tk-line)] object-cover" /> : null}
+          <BodyContent post={post} />
+          <EditableArticleComments slug={post.slug} comments={comments} />
+        </article>
+      </section>
       <RelatedStrip task="article" related={related} />
     </>
   )
@@ -409,6 +417,9 @@ function ProfileDetail({ post, related }: { post: SitePost; related: SitePost[] 
             <Kicker task="profile">Profile</Kicker>
             <BodyContent post={post} />
             <ImageStrip images={images.slice(1)} label="Gallery" />
+            <div className="mt-10">
+              <Ads slot="article-bottom" size="banner" showLabel className="mx-auto w-full" />
+            </div>
           </article>
         </div>
       </section>
@@ -567,4 +578,3 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
     </Link>
   )
 }
-
