@@ -1,10 +1,11 @@
 import { SITE_CONFIG } from '@/lib/site-config'
 import { pagesContent } from '@/editable/content/pages.content'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
+import { Ads } from '@/lib/ads'
 
 export default function AboutPage() {
   return (
-    <EditableSiteShell>
+    <EditableSiteShell hideShellAds>
       <main className="px-4 py-14 sm:px-6 lg:px-8">
         <section className="mx-auto grid max-w-[var(--editable-container)] gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <article className="rounded-sm border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-8 lg:p-12">
@@ -23,6 +24,9 @@ export default function AboutPage() {
               </div>
             ))}
           </aside>
+        </section>
+        <section className="mx-auto mt-12 max-w-5xl">
+          <Ads slot="in-feed" size="billboard" showLabel className="mx-auto w-full" />
         </section>
       </main>
     </EditableSiteShell>
